@@ -1,22 +1,33 @@
-<?php include "config.php"; ?>
+<?php
+
+require 'insert.php';
+require 'update.php';
+require 'delete.php';
+require 'select.php';
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDO CRUD System</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
+/* Cool Boy Theme */
 body {
-    background: linear-gradient(135deg,#ff9ecf,#ffc3e6,#ffe6f2);
+    background: linear-gradient(135deg, #0a0e27, #1a1f3a, #0f2844);
     min-height: 100vh;
-    font-family: 'Poppins', sans-serif;
+    color: #e0e0e0;
 }
 
 .card {
-    border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(255,105,180,0.3);
-    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 188, 255, 0.15);
+    background: linear-gradient(135deg, #1a2442, #0f3460);
+    border: 2px solid #00bcff;
 }
 
 .table {
@@ -24,96 +35,196 @@ body {
     overflow: hidden;
 }
 
+.table thead {
+    background: linear-gradient(90deg, #00bcff, #0088ff);
+    color: #0a0e27;
+    font-weight: 700;
+}
+
+.table tbody tr:nth-child(odd) {
+    background-color: rgba(0, 188, 255, 0.08);
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: rgba(0, 136, 255, 0.05);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 188, 255, 0.15);
+    transition: 0.3s;
+}
+
 .btn {
-    border-radius: 20px;
-    font-weight: 500;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
 }
 
 .btn-success {
-    background-color: #ff69b4;
-    border: none;
-}
-
-.btn-success:hover {
-    background-color: #ff1493;
-}
-
-.btn-warning {
-    background-color: #ffb6c1;
-    border: none;
-    color: #000;
-}
-
-.btn-danger {
-    background-color: #ff4d6d;
-    border: none;
-}
-
-.form-control {
-    border-radius: 15px;
-    border: 2px solid #ffb6c1;
-}
-
-.form-control:focus {
-    border-color: #ff69b4;
-    box-shadow: 0 0 5px #ff69b4;
-}
-
-.table thead {
-    background-color: #ff69b4;
+    background: linear-gradient(135deg, #00d084, #00a86b);
     color: white;
 }
 
-h4 {
-    font-weight: bold;
+.btn-success:hover {
+    background: linear-gradient(135deg, #00a86b, #008c4a);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 208, 132, 0.4);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ff8c00, #ff6b35);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #ff6b35, #ff4500);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff3a44, #e63946);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #e63946, #c92a2a);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(230, 57, 70, 0.4);
+}
+
+.btn-secondary {
+    background-color: #555;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #777;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #00bcff;
+    background-color: rgba(10, 14, 39, 0.7);
+    color: #e0e0e0;
+}
+
+.form-control:focus {
+    border-color: #0088ff;
+    background-color: rgba(10, 14, 39, 0.9);
+    box-shadow: 0 0 0 0.2rem rgba(0, 188, 255, 0.25);
+    color: #e0e0e0;
+}
+
+.form-label {
+    color: #00bcff;
+    font-weight: 600;
+}
+
+h2, h3, h4 {
+    color: #00d4ff;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.alert {
+    border-radius: 10px;
+    border: 2px solid #00bcff;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container py-5">
+<div class="container-fluid py-5">
+
+<?php if (isset($_GET['added'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>✓ Success!</strong> User added successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php elseif (isset($_GET['updated'])): ?>
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <strong>✓ Updated!</strong> User updated successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php elseif (isset($_GET['deleted'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>✓ Deleted!</strong> User deleted successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<h2 class="mb-4 text-center">⚙️ CRUD System</h2>
 
 <div class="row g-4">
 
-<!-- ADD USER CARD -->
-<div class="col-md-4">
-<div class="card p-4 bg-white text-dark">
+<!-- FORM SECTION -->
+<div class="col-lg-5">
+<div class="card p-4">
 
-<h4 class="mb-4 text-center" style="color:#ff1493;">💖 Add New User</h4>
+<?php
 
-<form action="insert.php" method="POST">
-<div class="mb-3">
-<label>Name</label>
-<input type="text" name="name" class="form-control" required>
-</div>
+// CHECK IF EDIT MODE
+$editUser = null;
 
-<div class="mb-3">
-<label>Email</label>
-<input type="email" name="email" class="form-control" required>
-</div>
+if (isset($_GET['edit'])) {
+  $users_id = $_GET['edit'];
+  $stmt = $pdo->prepare("SELECT u.*, o.orders_id, o.product, o.amount FROM users u LEFT JOIN orders o ON u.users_id = o.users_id WHERE u.users_id = ?");
+  $stmt->execute([$users_id]);
+  $editUser = $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
-<div class="mb-3">
-<label>Product</label>
-<input type="text" name="product" class="form-control" required>
-</div>
+?>
 
-<div class="mb-3">
-<label>Amount</label>
-<input type="number" step="0.01" name="amount" class="form-control" required>
-</div>
+<h4 class="mb-4"><?= $editUser ? '✏️ Update User' : '➕ Add New User' ?></h4>
 
-<button class="btn btn-success w-100">✨ Add User</button>
+<form method="POST">
+
+  <?php if (!empty($editUser)): ?>
+    <input type="hidden" name="users_id" value="<?= htmlspecialchars($editUser['users_id']) ?>">
+  <?php endif; ?>
+
+  <div class="mb-3">
+    <label class="form-label">Name</label>
+    <input type="text" name="name" class="form-control" value="<?= !empty($editUser) ? htmlspecialchars($editUser['name']) : '' ?>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Email</label>
+    <input type="email" name="email" class="form-control" value="<?= !empty($editUser) ? htmlspecialchars($editUser['email']) : '' ?>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Product</label>
+    <input type="text" name="product" class="form-control" value="<?= !empty($editUser) ? htmlspecialchars($editUser['product']) : '' ?>" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Amount</label>
+    <input type="number" step="0.01" name="amount" class="form-control" value="<?= !empty($editUser) ? htmlspecialchars($editUser['amount']) : '' ?>" required>
+  </div>
+
+  <div class="d-grid gap-2">
+    <?php if (!empty($editUser)): ?>
+      <button type="submit" name="update" class="btn btn-warning">Update</button>
+      <a href="landing.php" class="btn btn-secondary">Cancel</a>
+    <?php else: ?>
+      <button type="submit" name="add" class="btn btn-success">Add User</button>
+    <?php endif; ?>
+  </div>
+
 </form>
 
 </div>
 </div>
 
-<!-- USER LIST -->
-<div class="col-md-8">
-<div class="card p-4 bg-white text-dark">
+<!-- USER LIST SECTION -->
+<div class="col-lg-7">
+<div class="card p-4">
 
-<h4 class="mb-4 text-center" style="color:#ff1493;">🌸 User & Order List</h4>
+<h4 class="mb-4">� User & Order List</h4>
 
 <div class="table-responsive">
 <table class="table table-hover align-middle text-center">
@@ -129,22 +240,19 @@ h4 {
 </thead>
 
 <tbody>
-<?php
-$stmt = $conn->query("SELECT * FROM users");
-while($row = $stmt->fetch(PDO::FETCH_ASSOC)):
-?>
+<?php foreach ($users as $user): ?>
 <tr>
-<td><?= $row['users_id'] ?></td>
-<td><?= $row['name'] ?></td>
-<td><?= $row['email'] ?></td>
-<td><?= $row['product'] ?></td>
-<td>₱<?= number_format($row['amount'],2) ?></td>
+<td><?= htmlspecialchars($user['users_id']) ?></td>
+<td><?= htmlspecialchars($user['name']) ?></td>
+<td><?= htmlspecialchars($user['email']) ?></td>
+<td><?= isset($user['product']) ? htmlspecialchars($user['product']) : '-' ?></td>
+<td><?= isset($user['amount']) && $user['amount'] !== null ? '$' . number_format($user['amount'], 2) : '-' ?></td>
 <td>
-<a href="update.php?users_id=<?= $row['users_id'] ?>" class="btn btn-warning btn-sm">Edit</a>
-<a href="delete.php?users_id=<?= $row['users_id'] ?>" class="btn btn-danger btn-sm">Delete</a>
+<a href="?edit=<?= htmlspecialchars($user['users_id']) ?>" class="btn btn-warning btn-sm">Edit</a>
+<a href="delete.php?users_id=<?= htmlspecialchars($user['users_id']) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
 </td>
 </tr>
-<?php endwhile; ?>
+<?php endforeach; ?>
 </tbody>
 </table>
 </div>
@@ -153,7 +261,9 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)):
 </div>
 
 </div>
+
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
